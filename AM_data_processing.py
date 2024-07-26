@@ -202,10 +202,13 @@ class plotting_AM_heatmap(extract_AM_data, retrieve_AFDB):
         cbar.set_ticklabels([f'{i / 10.0:.1f}' for i in range(11)])
         plt.tight_layout()
 
+        # Display the plot
+        plt.show()  # Add this line to show the plot
+
         # Save the plot to a file
         output_directory = "data_output"
         ensure_directory_exists(output_directory)
         
         output_file = os.path.join(output_directory, f"pathogenicity_heatmap_{self.uniprot_accession}_AM_heatmap.png")
         plt.savefig(output_file)
-        plt.close()
+        plt.close()  # Close the figure after saving to free up resources
