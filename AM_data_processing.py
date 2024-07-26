@@ -14,6 +14,12 @@ from api_handler import retrieve_AFDB
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #Change the logging to DEBUG when needed to turn the logs back on
 
+def ensure_directory_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        logging.info(f"Created directory: {directory}")
+
+
 class extract_AM_data(retrieve_AFDB):
     """
     Extract AlphaMissense data from the previous call and store it as a df with 3 columns:
@@ -42,7 +48,10 @@ class extract_AM_data(retrieve_AFDB):
                 "alternative_aa":alternative_aa,
                 "pathogenicity_score": pathogenicity_score})
         
-        output_file = f"../data_output/{self.uniprot_accession}_AM_scores.csv"
+        output_directory = "data_output"
+        ensure_directory_exists(output_directory)
+        output_file = os.path.join(output_directory, f"{self.uniprot_accession}_AM_scores.csv")
+      
         try:
             AM_data.to_csv(output_file, index=False)
             logging.info(f"AM data saved to: {output_file}")
@@ -90,7 +99,10 @@ class process_AM_data(extract_AM_data, retrieve_AFDB):
                 logging.error(f"Error fetching PDB data: {e}")
                 return   
             
-            output_file = f"../data_output/{self.uniprot_accession}_with_AM_scores.PDB"
+            output_directory = "data_output"
+            ensure_directory_exists(output_directory)
+            
+            output_file = os.path.join(output_directory,f"{self.uniprot_accession}_with_AM_scores.PDB")
             logging.info(f"Writing modified PDB data to: {output_file}")
             
             try:
@@ -191,6 +203,9 @@ class plotting_AM_heatmap(extract_AM_data, retrieve_AFDB):
         plt.tight_layout()
 
         # Save the plot to a file
-        output_file = f'../data_output/pathogenicity_heatmap_{self.uniprot_accession}_AM_heatmap.png'
+        output_directory = "data_output"
+        ensure_directory_exists(output_directory)
+        
+        output_file = os.path.join(output_directory, f"pathogenicity_heatmap_{self.uniprot_accession}_AM_heatmap.png")
         plt.savefig(output_file)
         plt.close()
