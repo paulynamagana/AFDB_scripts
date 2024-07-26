@@ -31,7 +31,7 @@ class AlphaFold_DB_API():
             print(f"Error retrieving data for {self.uniprot_accession}: {e}")
             return None
 
-class Retrieve_AFDB(AlphaFold_DB_API):
+class retrieve_AFDB(AlphaFold_DB_API):
     """
     A class for retrieving AlphaMissense and PDB URLs from the AlphaFold Database.
 
