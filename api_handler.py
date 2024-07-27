@@ -72,7 +72,7 @@ class retrieve_AFDB(AlphaFold_DB_API):
             return f"Error retrieving data for {self.uniprot_accession}"
 
 
-    def get_PAE_url(self):
+    def get_pae_url(self):
             """Retrieves the PAE URL, if available.
 
             Returns:
