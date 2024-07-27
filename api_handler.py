@@ -42,6 +42,7 @@ class retrieve_AFDB(AlphaFold_DB_API):
     Methods:
         get_AM_url: Retrieves the AlphaMissense URL, if available.
         get_pdb_url: Retrieves the PDB URL, if available.
+        get_PAE_url: Retrieves the PAE image.
     """
     def __init__(self, uniprot_accession):
         super().__init__(uniprot_accession)  # Call the parent constructor
@@ -66,6 +67,18 @@ class retrieve_AFDB(AlphaFold_DB_API):
             str: The PDB URL, or an error message if unavailable.
         """
         if self.result:
-            return self.result[0].get('pdbUrl', "Failed to retrieve protein data from AlphaFold API.")
+            return self.result[0].get('pdbUrl', "Failed to retrieve PDB file from AlphaFold API.")
+        else:
+            return f"Error retrieving data for {self.uniprot_accession}"
+
+
+def get_PAE_url(self):
+        """Retrieves the PAE URL, if available.
+
+        Returns:
+            str: The PAE URL, or an error message if unavailable.
+        """
+        if self.result:
+            return self.result[0].get('paeImageUrl', "Failed to retrieve PAE from AlphaFold API.")
         else:
             return f"Error retrieving data for {self.uniprot_accession}"
