@@ -55,8 +55,7 @@ class retrieve_AFDB(AlphaFold_DB_API):
             str: The AlphaMissense URL, or an error message if unavailable.
         """
         if self.result:
-            return self.result[0].get('amAnnotationsUrl',
-                    f"The UniProt ID {self.uniprot_accession} does not contain data for AlphaMissense.")
+            return self.result[0].get('amAnnotationsUrl', f"The UniProt ID {self.uniprot_accession} does not contain data for AlphaMissense.")
         else:
             return f"Error retrieving data for {self.uniprot_accession}"
 
@@ -73,12 +72,12 @@ class retrieve_AFDB(AlphaFold_DB_API):
 
 
     def get_pae_url(self):
-            """Retrieves the PAE URL, if available.
+        """Retrieves the PAE URL, if available.
 
-            Returns:
-                str: The PAE URL, or an error message if unavailable.
-            """
-            if self.result:
-                return self.result[0].get('paeImageUrl', "Failed to retrieve PAE from AlphaFold API.")
-            else:
-                return f"Error retrieving data for {self.uniprot_accession}"
+        Returns:
+            str: The PAE URL, or an error message if unavailable.
+        """
+        if self.result:
+            return self.result[0].get('paeImageUrl', "Failed to retrieve PAE from AlphaFold API.")
+        else:
+            return f"Error retrieving data for {self.uniprot_accession}"
