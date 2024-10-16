@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
+import os
 
 def plot_plddt_legend(dpi=100):
     """
@@ -70,7 +71,6 @@ def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
 
         # Save the plot to a file
     output_directory = "data_output"
-    
     output_file = os.path.join(output_directory, f"graph_plDDT-AM-score_{uniprot_id}.png")
     plt.savefig(output_file) #save file 
     
