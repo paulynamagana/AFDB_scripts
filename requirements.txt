@@ -19,3 +19,4 @@ seaborn==0.13.2
 six==1.16.0
 tzdata==2024.1
 urllib3==2.2.3
+py3Dmol==2.4.0
