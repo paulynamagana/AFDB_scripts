@@ -106,7 +106,7 @@ def modify_pdb_with_am_data(pdb_url, average_scores_file):
         logging.error(f"Error writing to file: {e}")
 
     
-def plot_am_heatmap(am_data):
+def plot_am_heatmap(am_data, uniprot_id):
     """
     Plots a heatmap for the AlphaMissense data with reference residues on x and alternative_aa on y axis
     Colour coded following the original colours from the AlphaFold Database, see: https://alphafold.ebi.ac.uk/entry/Q5VSL9
@@ -174,7 +174,7 @@ def plot_am_heatmap(am_data):
     output_directory = "data_output"
     ensure_directory_exists(output_directory)
     
-    output_file = os.path.join(output_directory, f"AM_heatmap.png")
+    output_file = os.path.join(output_directory, f"AM_heatmap_{uniprot_id}.png")
     plt.savefig(output_file) #save file 
     plt.show() # Show plot
 
