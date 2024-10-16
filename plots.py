@@ -36,7 +36,7 @@ def plot_plddt_legend(dpi=100):
     return fig
 
 
-def plot_scores(pathogenicity_scores, plddt_scores):
+def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
     """
     Plots pathogenicity and rescaled pLDDT scores against residue number using Seaborn.
 
@@ -68,6 +68,13 @@ def plot_scores(pathogenicity_scores, plddt_scores):
     plt.legend()
     plt.grid(axis='y', linestyle='--')  # Optional grid
 
+        # Save the plot to a file
+    output_directory = "data_output"
+    
+    output_file = os.path.join(output_directory, f"graph_plDDT-AM-score_{uniprot_id}.png")
+    plt.savefig(output_file) #save file 
+    
     # Show the plot
     plt.show()
+    plt.close()
 
