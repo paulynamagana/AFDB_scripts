@@ -53,3 +53,4 @@ Output
 
 The script will save the AM data and modified PDB files to the data_output directory. It will also display the UniProt ID and plot the AM heatmap and score plots for each UniProt ID processed.
 
+[![DOI](https://zenodo.org/badge/834257572.svg)](https://doi.org/10.5281/zenodo.13942608)
