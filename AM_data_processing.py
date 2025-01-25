@@ -1,4 +1,4 @@
-# data_processing.py
+
 import pandas as pd
 import numpy as np
 import requests
@@ -7,6 +7,9 @@ import logging
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
+from alphafold_api_downloader import fetch_AFDB_data
+import plots
+import argparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 ### Change the logging to DEBUG when needed to turn the logs back on
@@ -15,6 +18,39 @@ def ensure_directory_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
         logging.info(f"Created directory: {directory}")
+
+
+def extract_alpha_missense_url(data):
+    """Extracts the AlphaMissense URL from the API data.
+
+    Args:
+        data (dict): The JSON data from the API.
+
+    Returns:
+        str: The AlphaMissense URL, or an error message.
+    """
+    if data:
+        logging.info(f"Retrieving AM data")
+        return data[0].get('amAnnotationsUrl', f"No AlphaMissense data for this protein.")
+    else:
+        return "Error: No data provided."
+
+
+def extract_pdb_url(data):
+    """Extracts the PDB URL from the API data.
+
+    Args:
+        data (dict): The JSON data from the API.
+
+    Returns:
+        str: The PDB url, or an error message.
+    """
+    if data:
+        logging.info(f"Retrieving url for PDB file")
+        return data[0].get('pdbUrl', "Failed to retrieve PDB URL.")
+    else:
+        return "Error: No data provided."
+    
 
 
 def extract_am_data(am_url):
@@ -105,82 +141,6 @@ def modify_pdb_with_am_data(pdb_url, average_scores_file):
     except IOError as e:
         logging.error(f"Error writing to file: {e}")
 
-    
-def plot_am_heatmap(am_data, uniprot_id):
-    """
-    Plots a heatmap for the AlphaMissense data with reference residues on x and alternative_aa on y axis
-    Colour coded following the original colours from the AlphaFold Database, see: https://alphafold.ebi.ac.uk/entry/Q5VSL9
-    """
-
-    #custom palette
-    def create_custom_colormap():
-        cdict = {
-            'red': [
-                (0.0, 56/255, 56/255),
-                (0.34, 204/255, 204/255),
-                (0.464, 204/255, 204/255),
-                (1.0, 165/255, 165/255)
-            ],
-            'green': [
-                (0.0, 83/255, 83/255),
-                (0.34, 204/255, 204/255),
-                (0.464, 204/255, 204/255),
-                (1.0, 13/255, 13/255)
-            ],
-            'blue': [
-                (0.0, 163/255, 163/255),
-                (0.34, 204/255, 204/255),
-                (0.464, 204/255, 204/255),
-                (1.0, 18/255, 18/255)
-            ]
-        }
-        return LinearSegmentedColormap('CustomMap', segmentdata=cdict)
-
-    # custom colormap
-    custom_cmap = create_custom_colormap()
-
-    # pivot table
-    pivot_table = am_data.pivot_table(values='pathogenicity_score', index='alternative_aa', columns='reference_aa', aggfunc='mean')
-    pivot_table = pd.pivot_table(am_data, values='pathogenicity_score',
-    index='alternative_aa', columns='residue_number')
-
-    #custom_order = ["R", "H", "K", "D", "E", "S", "T", "N", "Q", "C", "P", "A", "V", "I", "L", "M", "G", "F","Y","W"]
-
-    # Reindex the pivot table
-    #pivot_table = pivot_table.reindex(custom_order)
-
-    plt.figure(figsize=(20, 6))
-
-    ax = sns.heatmap(pivot_table, cmap=custom_cmap, vmin=0, vmax=1,
-    cbar_kws={'label': 'AlphaMissense score'}) # Limits for the color scale
-
-    ax.set_xlabel('Residue Number')
-    ax.set_ylabel('Alternative Amino Acid')
-    plt.title('AlphaMissense Pathogenicity Heatmap ')
-
-    xticks = range(0, pivot_table.shape[1], 50)
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(pivot_table.columns[xticks])
-    ax.set_facecolor('black') #Set background black for matching AA
-    plt.yticks(rotation = 0)
-
-    cbar = ax.collections[0].colorbar
-    cbar.set_ticks([i / 10.0 for i in range(11)])
-    cbar.set_ticklabels([f'{i / 10.0:.1f}' for i in range(11)])
-    plt.tight_layout()
-
-
-    # Save the plot to a file
-    output_directory = "data_output"
-    ensure_directory_exists(output_directory)
-    
-    output_file = os.path.join(output_directory, f"AM_heatmap_{uniprot_id}.png")
-    plt.savefig(output_file) #save file 
-    plt.show() # Show plot
-
-    plt.close() # Close the figure after saving to free up resources
-
-
 
 def extract_pathogenicity_and_plddt(am_file_path, pdb_file_url):
     """
@@ -231,3 +191,63 @@ def extract_pathogenicity_and_plddt(am_file_path, pdb_file_url):
             logging.error("Error parsing pLDDT scores in the PDB file.")
 
     return pathogenicity_scores, plddt_scores
+
+
+def process_am_from_file(filename):
+    """
+    Reads UniProt IDs from a text file, fetches data and extracts URLs.
+
+    Args:
+        filename (str): The name of the file containing UniProt IDs.
+        extract_am_files (bool): Whether to extract files from amAnnotationsHg19Url and amAnnotationsHg38Url.
+    """
+    
+    with open(filename, 'r') as f:
+        uniprot_ids = f.read().replace(' ', '').split(',')  # Remove whitespace and split by comma
+        
+    output_dir = "downloaded_files"
+    os.makedirs(output_dir, exist_ok=True)
+
+    
+    for uniprot_id in uniprot_ids:
+        try:
+            data = fetch_AFDB_data(uniprot_id)
+            if data:
+                am_data_url = extract_alpha_missense_url(data)
+                
+                if not am_data_url or not am_data_url.startswith("http"):  # Check for both None and invalid URLs
+                    continue
+
+                am_data = extract_am_data(am_data_url)
+                pdb_data_url = extract_pdb_url(data)
+                
+                if am_data is not None:
+                    average_scores = calculate_average_pathogenicity(am_data)
+                    modify_pdb_with_am_data(pdb_data_url, average_scores)
+                    print(uniprot_id)
+                    plots.plot_am_heatmap(am_data, uniprot_id)
+                
+
+                file_path= f"data_output/AM_scores_AF-{uniprot_id}-F1-model_v4.pdb"
+                pathogenicity_scores, plddt_scores = extract_pathogenicity_and_plddt(file_path, pdb_data_url)
+
+                print(uniprot_id)
+                plots.plot_scores(pathogenicity_scores, plddt_scores, uniprot_id)
+                            
+        except requests.exceptions.RequestException as e:
+            print(f"Error processing {uniprot_id}: {e}")
+
+
+
+# Define the main function
+def main():
+    parser = argparse.ArgumentParser(description='Fetch and extract URLs from the AlphaFold Database API.')
+    parser.add_argument('filename', help='Text file containing UniProt IDs, one per line')
+    args = parser.parse_args()
+
+    # Call the process_uniprot_ids_from_file function with the provided filename and output option
+    process_am_from_file(args.filename)
+
+# Call the main function if this script is run directly
+if __name__ == '__main__':
+    main()
