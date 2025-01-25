@@ -62,4 +62,9 @@ where `<filename>` is the name of the text file containing the UniProt IDs.
 
 The script will save the AM data and modified PDB files to the data_output directory. It will also display the UniProt ID and plot the AM heatmap and score plots for each UniProt ID processed.
 
+## Accessibility via Google Colab
+
+For easier access and to avoid local installation, I've provided a Google Colab notebook that implements the same functionality as the Python script.
+
+
 [![DOI](https://zenodo.org/badge/834257572.svg)](https://doi.org/10.5281/zenodo.13942608)
