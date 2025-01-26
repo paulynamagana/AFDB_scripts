@@ -66,18 +66,26 @@ def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
     df = pd.DataFrame(data)
 
     # Create line plots with Seaborn
-    plt.figure(figsize=(12, 5))
-    sns.lineplot(x='Residue number', y='Average pathogenicity', data=df, label='Average pathogenicity')
+    plt.figure(figsize=(12, 6))
+    ax = plt.subplot(111)
+    sns.lineplot(x='Residue number', y='Average pathogenicity', data=df, label='Average AM score')
     sns.lineplot(x='Residue number', y='pLDDT (rescaled)', data=df, label='pLDDT (rescaled)')
 
     # Add labels, title, and legend
     plt.xlabel('Residue number')
     plt.ylabel('Score')
+    plt.ylim(0, 1)
     plt.title(f'Average AM and pLDDT scores per position ({uniprot_id})')
-    plt.legend()
+    
+    # Place the legend outside the chart
+    # Put a legend below current axis
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
+              fancybox=True, shadow=True, ncol=5)
+
     plt.grid(axis='y', linestyle='--')  # Optional grid
 
         # Save the plot to a file
+    plt.tight_layout(rect=[0, 0.1, 1, 1])  # Leaves space below for the legend
     output_directory = "data_output"
     output_file = os.path.join(output_directory, f"graph_plDDT-AM-score_{uniprot_id}.png")
     plt.savefig(output_file) #save file 
