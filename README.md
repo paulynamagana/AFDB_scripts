@@ -61,6 +61,12 @@ where `<filename>` is the name of the text file containing the UniProt IDs.
 ### Output
 
 The script will save the AM data and modified PDB files to the data_output directory. It will also display the UniProt ID and plot the AM heatmap and score plots for each UniProt ID processed.
+Plots will look like this:
+
+![AM heatmap](https://github.com/paulynamagana/AFDB_scripts/blob/main/data_output/AM_heatmap_P04637.png)
+
+![pLDDT and AM scores](https://github.com/paulynamagana/AFDB_scripts/blob/main/data_output/graph_plDDT-AM-score_P04637.png)
+
 
 ## Accessibility via Google Colab
 
