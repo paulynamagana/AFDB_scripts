@@ -73,7 +73,7 @@ def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
     # Add labels, title, and legend
     plt.xlabel('Residue number')
     plt.ylabel('Score')
-    plt.title('Average AM and pLDDT scores per position')
+    plt.title(f'Average AM and pLDDT scores per position ({uniprot_id})')
     plt.legend()
     plt.grid(axis='y', linestyle='--')  # Optional grid
 
@@ -137,7 +137,7 @@ def plot_am_heatmap(am_data, uniprot_id):
 
     ax.set_xlabel('Residue Number')
     ax.set_ylabel('Alternative Amino Acid')
-    plt.title('AlphaMissense Pathogenicity Heatmap ')
+    plt.title(f'AlphaMissense Pathogenicity Heatmap ({uniprot_id})')
 
     xticks = range(0, pivot_table.shape[1], 50)
     ax.set_xticks(xticks)
