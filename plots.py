@@ -78,7 +78,6 @@ def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
     plt.title(f'Average AM and pLDDT scores per position ({uniprot_id})')
     
     # Place the legend outside the chart
-    # Put a legend below current axis
     ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),
               fancybox=True, shadow=True, ncol=5)
 
