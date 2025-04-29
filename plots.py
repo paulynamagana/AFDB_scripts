@@ -94,13 +94,15 @@ def plot_scores(pathogenicity_scores, plddt_scores, uniprot_id):
     plt.close()
 
 
+
 def plot_am_heatmap(am_data, uniprot_id):
     """
-    Plots a heatmap for the AlphaMissense data with reference residues on x and alternative_aa on y axis
+    Plots a heatmap for the AlphaMissense data with residue number on the primary x-axis
+    and reference residues on the secondary x-axis, alternative_aa on y axis.
     Colour coded following the original colours from the AlphaFold Database, see: https://alphafold.ebi.ac.uk/entry/Q5VSL9
     """
 
-    #custom palette
+    # custom palette
     def create_custom_colormap():
         cdict = {
             'red': [
@@ -128,35 +130,55 @@ def plot_am_heatmap(am_data, uniprot_id):
     custom_cmap = create_custom_colormap()
 
     # pivot table
-    pivot_table = am_data.pivot_table(values='pathogenicity_score', index='alternative_aa', columns='reference_aa', aggfunc='mean')
     pivot_table = pd.pivot_table(am_data, values='pathogenicity_score',
-    index='alternative_aa', columns='residue_number')
+                                 index='alternative_aa', columns='residue_number')
 
-    #custom_order = ["R", "H", "K", "D", "E", "S", "T", "N", "Q", "C", "P", "A", "V", "I", "L", "M", "G", "F","Y","W"]
+    #if the sequence is too long, then the axis looks all cluttered
+    sequence_length = pivot_table.shape[1] # Determine the length of the protein sequence
 
-    # Reindex the pivot table
-    #pivot_table = pivot_table.reindex(custom_order)
-
-    plt.figure(figsize=(20, 6))
-
+    # Dynamically adjust the figure size.  You can adjust the scaling factors as needed.
+    fig_width = max(10, sequence_length * 0.15)  # Minimum width of 10 inches
+    fig_height = 6  # Keep height constant, or adjust as needed
+    plt.figure(figsize=(fig_width, fig_height))
     ax = sns.heatmap(pivot_table, cmap=custom_cmap, vmin=0, vmax=1,
-    cbar_kws={'label': 'AlphaMissense score'}) # Limits for the color scale
+                     cbar_kws={'label': 'AlphaMissense score'})  # Limits for the color scale
 
     ax.set_xlabel('Residue Number')
     ax.set_ylabel('Alternative Amino Acid')
     plt.title(f'AlphaMissense Pathogenicity Heatmap ({uniprot_id})')
 
-    xticks = range(0, pivot_table.shape[1], 50)
-    ax.set_xticks(xticks)
-    ax.set_xticklabels(pivot_table.columns[xticks])
-    ax.set_facecolor('black') #Set background black for matching AA
-    plt.yticks(rotation = 0)
+    primary_xticks = range(0, pivot_table.shape[1], 20)  # Ticks for the primary x-axis
+    ax.set_xticks(primary_xticks)
+    ax.set_xticklabels(pivot_table.columns[primary_xticks])
+    ax.set_facecolor('black')  # Set background black for matching AA
+    plt.yticks(rotation=0)
 
     cbar = ax.collections[0].colorbar
     cbar.set_ticks([i / 10.0 for i in range(11)])
     cbar.set_ticklabels([f'{i / 10.0:.1f}' for i in range(11)])
-    plt.tight_layout()
 
+    # Create the second x-axis
+    ax2 = ax.twiny()  # Create a twin Axes sharing the y-axis
+
+    # Get unique residue numbers and corresponding reference amino acids, preserving order
+    unique_residues = am_data[['residue_number', 'reference_aa']].drop_duplicates(subset=['residue_number'])
+    unique_residues = unique_residues.sort_values('residue_number')
+
+    # Set the tick locations and labels for the top x-axis
+    secondary_xticks = range(0, pivot_table.shape[1], 1)  # Show all ticks
+    ax2.set_xticks(secondary_xticks)
+
+    ref_aa_labels = [unique_residues[unique_residues['residue_number'] == i]['reference_aa'].values[0]
+                       if i in unique_residues['residue_number'].values else ''
+                       for i in secondary_xticks]
+
+    ax2.set_xticklabels(ref_aa_labels)
+    ax2.set_xlabel(' ')  # Label the top x-axis
+    # Make the labels smaller
+    ax2.tick_params(axis='x', labelsize='small')
+
+    # Adjust layout to prevent labels from overlapping
+    plt.tight_layout()
 
     # Save the plot to a file
     output_directory = "data_output"

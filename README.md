@@ -7,15 +7,27 @@ This repository contains two Python scripts for working with the AlphaFold Datab
 
 These scripts can be used to download AlphaMissense (AM) data and PDB URLs for a list of UniProt IDs, calculate average pathogenicity scores for each residue, modify PDB files with these scores, and visualize the data using heatmaps.
 
-Prerequisites:
+## Getting Started
 
-``Python 3.6 or higher``<br>
-``requests library``
+### Prerequisites
 
-## Installation
+* Python 3.6 or higher
+* A `requirements.txt` file is provided to easily create a dedicated environment with the necessary Python libraries.
 
-1. Clone the repository: git clone [invalid URL removed]
-2. Install the required library: pip install requests
+### Installation
+
+1.  Clone this repository (or download the script file and the `requirements.txt` file).
+2.  Navigate to the repository directory in your terminal or command prompt.
+3.  Create a virtual environment (recommended) using your preferred method (e.g., `venv`, `conda`). For example, using `venv`:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Linux/macOS
+    venv\Scripts\activate  # On Windows
+    ```
+4.  Install the required Python libraries from the `requirements.txt` file:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 
 ## `alphafold_api_downloader.py`
@@ -48,20 +60,39 @@ If you use the `--extract_am_files` option, it will download all files.
 
 ## `AM_data_processing.py`
 
-This script processes UniProt IDs to extract AlphaMissense (AM) data and PDB URLs from the AlphaFold Database API. It then calculates average pathogenicity scores for each residue, modifies PDB files with these scores, and plots heatmaps to visualize the data.
+The script performs the following steps:
+
+1.  **Fetches Data:** Retrieves AlphaMissense annotation URLs and PDB URLs from the AlphaFold Database API using a provided UniProt ID.
+2.  **Extracts AlphaMissense Data:** Downloads and parses the AlphaMissense data, extracting pathogenicity scores and corresponding residue information.
+3.  **Calculates Average Pathogenicity:** Computes the average pathogenicity score for each residue across all observed variants.
+4.  **Modifies PDB File:** Downloads the PDB file and writes a new PDB file where the B-factor column (columns 61-66) for each ATOM and HETATM record is replaced with the calculated average AlphaMissense pathogenicity score for that residue.
+5.  **Generates Plots:**
+    * Creates a heatmap visualizing the pathogenicity scores for each variant across the protein sequence.
+    * Generates a scatter plot comparing the average pathogenicity scores (stored in the modified PDB) against the pLDDT values extracted from the original PDB file.
 
 ### Usage
+### Running the Script
 
-To use this script, you need to provide a text file containing a list of UniProt IDs. You can then run the script using the following command:
+1.  Create a text file (e.g., `uniprot_ids.txt`) containing one or more UniProt IDs, separated by commas (no spaces). For example:
+    ```
+    P0DTD1,Q9Y2H6
+    ```
+2.  Ensure your virtual environment is activated.
+3.  Run the script, providing the text file as an argument:
+    ```bash
+    python your_script_name.py uniprot_ids.txt
+    ```
+    Replace `your_script_name.py` with the actual name of the Python script.
 
-`python AM_data_processing.py <filename>`
-
-where `<filename>` is the name of the text file containing the UniProt IDs.
 
 ### Output
 
-The script will save the AM data and modified PDB files to the data_output directory. It will also display the UniProt ID and plot the AM heatmap and score plots for each UniProt ID processed.
-Plots will look like this:
+Upon successful execution, the script will create a directory named `data_output` containing:
+
+* CSV files of the downloaded AlphaMissense data.
+* Modified PDB files named `AM_scores_AF-{UniProtID}-F1-model_v4.pdb`, where the B-factor column contains the average AlphaMissense pathogenicity scores.
+* A heatmap plot (PNG file) visualizing the pathogenicity scores for each variant.
+* A scatter plot (PNG file) comparing the average pathogenicity scores and pLDDT values.
 
 ![AM heatmap](https://github.com/paulynamagana/AFDB_scripts/blob/main/data_output/AM_heatmap_P04637.png)
 
@@ -70,7 +101,6 @@ Plots will look like this:
 
 ## Accessibility via Google Colab
 
-For easier access and to avoid local installation, I've provided a Google Colab notebook that implements the same functionality as the Python script.
+You can also run this script easily on Google Colab:
 
-
-[![DOI](https://zenodo.org/badge/834257572.svg)](https://doi.org/10.5281/zenodo.13942608)
+[![Open In Colab](https://colab.research.google.com/github/paulynamagana/afdb-analysis-tools/blob/main/notebooks/alphamissense_notebook.ipynb)
